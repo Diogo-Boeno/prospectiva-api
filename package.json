@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "fastapi": "^0.0.8",
+    "python3": "^0.0.1",
+    "unicorn": "^0.0.1"
+  }
+}
