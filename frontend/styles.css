@@ -1,4 +1,355 @@
+/* ── reset ── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── base ── */
 body {
     font-family: sans-serif;
-    padding: 20px;
+    background: #0f0f0f;
+    color: #e8e8e8;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+.app {
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+/* ── topbar ── */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.logo {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e8e8e8;
+}
+
+.logo span {
+    color: #1D9E75;
+}
+
+.reload-btn {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #888;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.reload-btn:hover {
+    background: #222;
+    color: #ccc;
+}
+
+/* ── aviso de API ── */
+.api-warning {
+    background: #1f1400;
+    border: 1px solid #7a4f0a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #f0a940;
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.api-warning code {
+    background: #2a2000;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* ── métricas ── */
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.metric {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+}
+
+.metric-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.metric-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #e8e8e8;
+}
+
+.metric-value.today {
+    color: #EF9F27;
+}
+
+.metric-value.late {
+    color: #E24B4A;
+}
+
+/* ── seção title ── */
+.section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 12px;
+}
+
+/* ── formulário ── */
+.form-card {
+    background: #141414;
+    border: 1px solid #242424;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.form-row.half {
+    grid-template-columns: 1fr;
+    max-width: 50%;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.field label {
+    font-size: 12px;
+    color: #666;
+}
+
+.field input {
+    background: #0f0f0f;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #e8e8e8;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.field input::placeholder {
+    color: #444;
+}
+
+.field input:focus {
+    border-color: #1D9E75;
+}
+
+/* date picker escuro no Chrome */
+.field input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.4;
+    cursor: pointer;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+.btn-primary {
+    background: #1D9E75;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #17856200;
+}
+
+.btn-primary:hover {
+    background: #158560;
+}
+
+.btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ── lista de contatos ── */
+.contacts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.contact-card {
+    background: #141414;
+    border: 1px solid #242424;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.15s;
+}
+
+.contact-card:hover {
+    border-color: #333;
+}
+
+.contact-card.urgente {
+    border-left: 3px solid #E24B4A;
+}
+
+.contact-card.hoje {
+    border-left: 3px solid #EF9F27;
+}
+
+.contact-card.ok {
+    border-left: 3px solid #1D9E75;
+}
+
+/* ── avatar ── */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.avatar.urgente {
+    background: #2a0f0f;
+    color: #E24B4A;
+}
+
+.avatar.hoje {
+    background: #2a1f00;
+    color: #EF9F27;
+}
+
+.avatar.ok {
+    background: #0d2a1f;
+    color: #1D9E75;
+}
+
+/* ── info do contato ── */
+.contact-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.contact-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e8e8e8;
+    margin-bottom: 2px;
+}
+
+.contact-empresa {
+    font-size: 12px;
+    color: #555;
+}
+
+/* ── data ── */
+.contact-date {
+    text-align: right;
+}
+
+.date-label {
+    font-size: 11px;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+.date-badge {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.date-badge.urgente {
+    background: #2a0f0f;
+    color: #E24B4A;
+}
+
+.date-badge.hoje {
+    background: #2a1f00;
+    color: #EF9F27;
+}
+
+.date-badge.ok {
+    background: #0d2a1f;
+    color: #1D9E75;
+}
+
+/* ── empty state ── */
+.empty {
+    text-align: center;
+    padding: 2.5rem;
+    color: #444;
+    font-size: 14px;
+    background: #141414;
+    border-radius: 12px;
+    border: 1px solid #242424;
+}
+
+/* ── toast ── */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1D9E75;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.toast.show {
+    opacity: 1;
 }
