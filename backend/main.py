@@ -59,6 +59,9 @@ class ContatoResponse(ContatoCreate):
     id: int
     criado_em: str
 
+class ContatoUpdate(BaseModel):
+    proximo_contato: str  # ex: "2025-06-10"
+
 
 # ──────────────────────────────────────────
 # Rotas
@@ -114,6 +117,44 @@ def listar_contatos():
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+@app.delete("/contatos/{id}", status_code=204)
+def deletar_contato(id: int):
+    """Remove um contato pelo ID."""
+    conn = get_db()
+    result = conn.execute("DELETE FROM contatos WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Contato não encontrado")
+
+
+@app.patch("/contatos/{id}", response_model=ContatoResponse)
+def atualizar_contato(id: int, body: ContatoUpdate):
+    """Atualiza a data do próximo follow-up."""
+    try:
+        datetime.strptime(body.proximo_contato, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail="proximo_contato deve estar no formato YYYY-MM-DD"
+        )
+
+    conn = get_db()
+    result = conn.execute(
+        "UPDATE contatos SET proximo_contato = ? WHERE id = ?",
+        (body.proximo_contato, id),
+    )
+    conn.commit()
+
+    if result.rowcount == 0:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Contato não encontrado")
+
+    row = conn.execute("SELECT * FROM contatos WHERE id = ?", (id,)).fetchone()
+    conn.close()
+    return dict(row)
 
 
 @app.get("/contatos/hoje")

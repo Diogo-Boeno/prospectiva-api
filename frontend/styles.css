@@ -109,7 +109,7 @@ body {
     color: #E24B4A;
 }
 
-/* ── seção title ── */
+/* ── section title ── */
 .section-title {
     font-size: 11px;
     font-weight: 600;
@@ -170,7 +170,6 @@ body {
     border-color: #1D9E75;
 }
 
-/* date picker escuro no Chrome */
 .field input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     opacity: 0.4;
@@ -196,16 +195,28 @@ body {
 }
 
 .btn-primary:hover {
-    background: #17856200;
-}
-
-.btn-primary:hover {
     background: #158560;
 }
 
 .btn-primary:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: #888;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-ghost:hover {
+    background: #1a1a1a;
+    color: #ccc;
 }
 
 /* ── lista de contatos ── */
@@ -322,6 +333,88 @@ body {
     color: #1D9E75;
 }
 
+/* ── botões de ação nos cards ── */
+.contact-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.contact-card:hover .contact-actions {
+    opacity: 1;
+}
+
+.btn-action {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid #2a2a2a;
+    background: #1a1a1a;
+    color: #666;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-action.remarcar:hover {
+    background: #0d2a1f;
+    color: #1D9E75;
+    border-color: #1D9E75;
+}
+
+.btn-action.deletar:hover {
+    background: #2a0f0f;
+    color: #E24B4A;
+    border-color: #E24B4A;
+}
+
+/* ── modal ── */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 100;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal {
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 340px;
+}
+
+.modal-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e8e8e8;
+    margin-bottom: 1rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 1.25rem;
+}
+
 /* ── empty state ── */
 .empty {
     text-align: center;
@@ -352,4 +445,8 @@ body {
 
 .toast.show {
     opacity: 1;
+}
+
+.toast.erro {
+    background: #E24B4A;
 }

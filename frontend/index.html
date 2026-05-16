@@ -68,10 +68,26 @@
 
     </div>
 
+    <!-- Modal remarcar data -->
+    <div class="modal-overlay" id="modalOverlay" onclick="fecharModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-title">remarcar follow-up</div>
+            <div class="field">
+                <label for="novaData">nova data</label>
+                <input type="date" id="novaData" />
+            </div>
+            <div class="modal-actions">
+                <button class="btn-ghost" onclick="fecharModal()">cancelar</button>
+                <button class="btn-primary" onclick="confirmarRemarcar()">salvar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script>
         const API = "http://localhost:8000";
+        let idEmEdicao = null;
 
         function hoje() {
             return new Date().toISOString().split("T")[0];
@@ -99,11 +115,53 @@
             return nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
         }
 
-        function showToast(msg) {
+        function showToast(msg, erro = false) {
             const t = document.getElementById("toast");
             t.textContent = msg;
-            t.classList.add("show");
-            setTimeout(() => t.classList.remove("show"), 2500);
+            t.className = "toast show" + (erro ? " erro" : "");
+            setTimeout(() => t.className = "toast", 2500);
+        }
+
+        function abrirModal(id, dataAtual) {
+            idEmEdicao = id;
+            document.getElementById("novaData").value = dataAtual;
+            document.getElementById("modalOverlay").classList.add("show");
+        }
+
+        function fecharModal() {
+            idEmEdicao = null;
+            document.getElementById("modalOverlay").classList.remove("show");
+        }
+
+        async function confirmarRemarcar() {
+            const novaData = document.getElementById("novaData").value;
+            if (!novaData || !idEmEdicao) return;
+
+            try {
+                const res = await fetch(`${API}/contatos/${idEmEdicao}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ proximo_contato: novaData })
+                });
+                if (!res.ok) throw new Error();
+                fecharModal();
+                showToast("follow-up remarcado ✓");
+                carregarContatos();
+            } catch {
+                showToast("erro ao remarcar", true);
+            }
+        }
+
+        async function deletarContato(id, nome) {
+            if (!confirm(`Remover "${nome}"?`)) return;
+            try {
+                const res = await fetch(`${API}/contatos/${id}`, { method: "DELETE" });
+                if (!res.ok) throw new Error();
+                showToast("contato removido");
+                carregarContatos();
+            } catch {
+                showToast("erro ao remover", true);
+            }
         }
 
         async function carregarContatos() {
@@ -138,6 +196,10 @@
                 <div class="date-label">follow-up</div>
                 <span class="date-badge ${tipo}">${labelData(c.proximo_contato)}</span>
               </div>
+              <div class="contact-actions">
+                <button class="btn-action remarcar" onclick="abrirModal(${c.id}, '${c.proximo_contato}')" title="Remarcar">↻</button>
+                <button class="btn-action deletar" onclick="deletarContato(${c.id}, '${c.nome}')" title="Remover">✕</button>
+              </div>
             </div>`;
                 }).join("");
 
@@ -155,7 +217,7 @@
             const empresa = document.getElementById("inputEmpresa").value.trim();
             const data = document.getElementById("inputData").value;
 
-            if (!nome || !empresa || !data) { showToast("preencha todos os campos"); return; }
+            if (!nome || !empresa || !data) { showToast("preencha todos os campos", true); return; }
 
             const btn = document.getElementById("btnSalvar");
             btn.disabled = true;
@@ -174,7 +236,7 @@
                 showToast("contato adicionado ✓");
                 carregarContatos();
             } catch {
-                showToast("erro ao salvar — backend rodando?");
+                showToast("erro ao salvar — backend rodando?", true);
             } finally {
                 btn.disabled = false;
                 btn.textContent = "+ adicionar contato";
