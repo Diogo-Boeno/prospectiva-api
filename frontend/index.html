@@ -129,13 +129,6 @@
             setTimeout(() => t.className = "toast", 2500);
         }
 
-        function abrirModal(id, dataAtual, contextoAtual) {
-            idEmEdicao = id;
-            document.getElementById("novaData").value = dataAtual;
-            document.getElementById("novoContexto").value = contextoAtual || "";
-            document.getElementById("modalOverlay").classList.add("show");
-        }
-
         function fecharModal() {
             idEmEdicao = null;
             document.getElementById("modalOverlay").classList.remove("show");
@@ -173,6 +166,29 @@
             }
         }
 
+        // delegação de eventos — evita problemas com aspas no onclick inline
+        document.addEventListener("click", function (e) {
+            const btn = e.target.closest(".btn-action");
+            if (!btn) return;
+
+            const card = btn.closest(".contact-card");
+            const id = parseInt(card.dataset.id);
+            const nome = card.dataset.nome;
+            const data = card.dataset.data;
+            const contexto = card.dataset.contexto || "";
+
+            if (btn.classList.contains("remarcar")) {
+                idEmEdicao = id;
+                document.getElementById("novaData").value = data;
+                document.getElementById("novoContexto").value = contexto;
+                document.getElementById("modalOverlay").classList.add("show");
+            }
+
+            if (btn.classList.contains("deletar")) {
+                deletarContato(id, nome);
+            }
+        });
+
         async function carregarContatos() {
             try {
                 const res = await fetch(`${API}/contatos`);
@@ -198,7 +214,11 @@
                         ? `<div class="contact-contexto">${c.contexto}</div>`
                         : "";
                     return `
-            <div class="contact-card ${tipo}">
+            <div class="contact-card ${tipo}"
+              data-id="${c.id}"
+              data-nome="${c.nome.replace(/"/g, '&quot;')}"
+              data-data="${c.proximo_contato}"
+              data-contexto="${(c.contexto || '').replace(/"/g, '&quot;')}">
               <div class="avatar ${tipo}">${iniciais(c.nome)}</div>
               <div class="contact-info">
                 <div class="contact-name">${c.nome}</div>
@@ -210,8 +230,8 @@
                 <span class="date-badge ${tipo}">${labelData(c.proximo_contato)}</span>
               </div>
               <div class="contact-actions">
-                <button class="btn-action remarcar" onclick="abrirModal(${c.id}, '${c.proximo_contato}', ${JSON.stringify(c.contexto || '')})" title="Editar">✎</button>
-                <button class="btn-action deletar" onclick="deletarContato(${c.id}, '${c.nome}')" title="Remover">✕</button>
+                <button class="btn-action remarcar" title="Editar">✎</button>
+                <button class="btn-action deletar" title="Remover">✕</button>
               </div>
             </div>`;
                 }).join("");
