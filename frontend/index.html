@@ -1,22 +1,494 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Prospectiva</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prospectiva · follow-up</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: sans-serif;
+            background: #f5f5f3;
+            color: #1a1a1a;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .app {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        /* ── topbar ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .logo span {
+            color: #1D9E75;
+        }
+
+        .reload-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .reload-btn:hover {
+            background: #f0f0f0;
+        }
+
+        /* ── aviso de API ── */
+        .api-warning {
+            background: #FAEEDA;
+            border: 1px solid #EF9F27;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #854F0B;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* ── métricas ── */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric {
+            background: white;
+            border-radius: 8px;
+            padding: 0.9rem 1rem;
+            border: 1px solid #e8e8e8;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        /* ── formulário ── */
+        .form-card {
+            background: white;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 12px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .field input {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            background: white;
+            color: #1a1a1a;
+        }
+
+        .field input:focus {
+            border-color: #1D9E75;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        .btn-primary {
+            background: #1D9E75;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #0F6E56;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ── lista de contatos ── */
+        .contacts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .contact-card {
+            background: white;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .contact-card.urgente {
+            border-left: 3px solid #E24B4A;
+        }
+
+        .contact-card.hoje {
+            border-left: 3px solid #EF9F27;
+        }
+
+        .contact-card.ok {
+            border-left: 3px solid #1D9E75;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .avatar.urgente {
+            background: #FCEBEB;
+            color: #A32D2D;
+        }
+
+        .avatar.hoje {
+            background: #FAEEDA;
+            color: #854F0B;
+        }
+
+        .avatar.ok {
+            background: #E1F5EE;
+            color: #0F6E56;
+        }
+
+        .contact-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contact-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .contact-empresa {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .contact-date {
+            text-align: right;
+        }
+
+        .date-label {
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .date-badge {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .date-badge.urgente {
+            background: #FCEBEB;
+            color: #A32D2D;
+        }
+
+        .date-badge.hoje {
+            background: #FAEEDA;
+            color: #854F0B;
+        }
+
+        .date-badge.ok {
+            background: #E1F5EE;
+            color: #0F6E56;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 2.5rem;
+            color: #aaa;
+            font-size: 14px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e8e8e8;
+        }
+
+        /* ── toast ── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1D9E75;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Prospectiva Frontend</h1>
+    <div class="app">
 
-    <form id="leadForm">
-        <input placeholder="Nome" id="name" required>
-        <input placeholder="Email" id="email" required>
-        <button>Enviar Lead</button>
-    </form>
+        <div class="topbar">
+            <div class="logo">Prospectiva <span>·</span> follow-up</div>
+            <button class="reload-btn" onclick="carregarContatos()">↻ atualizar</button>
+        </div>
 
-    <script src="app.js"></script>
+        <div class="api-warning" id="apiWarning">
+            ⚠️ Backend não encontrado em <code>localhost:8000</code>.
+            Rode <code>uvicorn main:app --reload</code> e clique em atualizar.
+        </div>
+
+        <div class="metrics">
+            <div class="metric">
+                <div class="metric-label">total de contatos</div>
+                <div class="metric-value" id="totalContatos">—</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">follow-up hoje</div>
+                <div class="metric-value" id="totalHoje" style="color:#854F0B;">—</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">atrasados</div>
+                <div class="metric-value" id="totalAtrasados" style="color:#A32D2D;">—</div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">novo contato</div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="inputNome">nome</label>
+                    <input type="text" id="inputNome" placeholder="João Silva" />
+                </div>
+                <div class="field">
+                    <label for="inputEmpresa">empresa</label>
+                    <input type="text" id="inputEmpresa" placeholder="Empresa X" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="inputData">próximo follow-up</label>
+                    <input type="date" id="inputData" />
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn-primary" id="btnSalvar" onclick="salvarContato()">
+                    + adicionar contato
+                </button>
+            </div>
+        </div>
+
+        <div class="section-title">próximos follow-ups</div>
+        <div class="contacts-list" id="listaContatos">
+            <div class="empty">carregando...</div>
+        </div>
+
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API = "http://localhost:8000";
+
+        function hoje() {
+            return new Date().toISOString().split("T")[0];
+        }
+
+        function classificar(data) {
+            const h = hoje();
+            if (data < h) return "urgente";
+            if (data === h) return "hoje";
+            return "ok";
+        }
+
+        function labelData(data) {
+            const h = hoje();
+            if (data < h) {
+                const dias = Math.round((new Date(h) - new Date(data)) / 86400000);
+                return dias === 1 ? "atrasado 1 dia" : `atrasado ${dias} dias`;
+            }
+            if (data === h) return "hoje";
+            const dias = Math.round((new Date(data) - new Date(h)) / 86400000);
+            return dias === 1 ? "amanhã" : `em ${dias} dias`;
+        }
+
+        function iniciais(nome) {
+            return nome.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 2500);
+        }
+
+        async function carregarContatos() {
+            try {
+                const res = await fetch(`${API}/contatos`);
+                if (!res.ok) throw new Error();
+                document.getElementById("apiWarning").style.display = "none";
+
+                const contatos = await res.json();
+                const h = hoje();
+
+                document.getElementById("totalContatos").textContent = contatos.length;
+                document.getElementById("totalHoje").textContent = contatos.filter(c => c.proximo_contato === h).length;
+                document.getElementById("totalAtrasados").textContent = contatos.filter(c => c.proximo_contato < h).length;
+
+                const lista = document.getElementById("listaContatos");
+                if (contatos.length === 0) {
+                    lista.innerHTML = '<div class="empty">nenhum contato ainda — adicione o primeiro acima ☝️</div>';
+                    return;
+                }
+
+                lista.innerHTML = contatos.map(c => {
+                    const tipo = classificar(c.proximo_contato);
+                    return `
+            <div class="contact-card ${tipo}">
+              <div class="avatar ${tipo}">${iniciais(c.nome)}</div>
+              <div class="contact-info">
+                <div class="contact-name">${c.nome}</div>
+                <div class="contact-empresa">${c.empresa}</div>
+              </div>
+              <div class="contact-date">
+                <div class="date-label">follow-up</div>
+                <span class="date-badge ${tipo}">${labelData(c.proximo_contato)}</span>
+              </div>
+            </div>`;
+                }).join("");
+
+            } catch {
+                document.getElementById("apiWarning").style.display = "block";
+                document.getElementById("listaContatos").innerHTML = '<div class="empty">não foi possível conectar ao backend</div>';
+                ["totalContatos", "totalHoje", "totalAtrasados"].forEach(id => {
+                    document.getElementById(id).textContent = "—";
+                });
+            }
+        }
+
+        async function salvarContato() {
+            const nome = document.getElementById("inputNome").value.trim();
+            const empresa = document.getElementById("inputEmpresa").value.trim();
+            const data = document.getElementById("inputData").value;
+
+            if (!nome || !empresa || !data) { showToast("preencha todos os campos"); return; }
+
+            const btn = document.getElementById("btnSalvar");
+            btn.disabled = true;
+            btn.textContent = "salvando...";
+
+            try {
+                const res = await fetch(`${API}/contatos`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nome, empresa, proximo_contato: data })
+                });
+                if (!res.ok) throw new Error();
+                document.getElementById("inputNome").value = "";
+                document.getElementById("inputEmpresa").value = "";
+                document.getElementById("inputData").value = hoje();
+                showToast("contato adicionado ✓");
+                carregarContatos();
+            } catch {
+                showToast("erro ao salvar — backend rodando?");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "+ adicionar contato";
+            }
+        }
+
+        document.getElementById("inputData").value = hoje();
+        carregarContatos();
+    </script>
 </body>
 
 </html>

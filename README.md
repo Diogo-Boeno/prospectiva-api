@@ -5,6 +5,7 @@ API para cadência de follow-up de SDRs.
 ## Setup (1x)
 
 ```bash
+.\venv\Scripts\Activate.ps1
 cd backend
 pip install -r requirements.txt
 ```
