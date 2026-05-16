@@ -48,10 +48,14 @@
                     <input type="text" id="inputEmpresa" placeholder="Empresa X" />
                 </div>
             </div>
-            <div class="form-row half">
+            <div class="form-row">
                 <div class="field">
                     <label for="inputData">próximo follow-up</label>
                     <input type="date" id="inputData" />
+                </div>
+                <div class="field">
+                    <label for="inputContexto">contexto da última conversa</label>
+                    <input type="text" id="inputContexto" placeholder="Ex: enviou proposta, aguardando resposta..." />
                 </div>
             </div>
             <div class="form-actions">
@@ -68,17 +72,21 @@
 
     </div>
 
-    <!-- Modal remarcar data -->
+    <!-- Modal remarcar / editar contexto -->
     <div class="modal-overlay" id="modalOverlay" onclick="fecharModal()">
         <div class="modal" onclick="event.stopPropagation()">
-            <div class="modal-title">remarcar follow-up</div>
-            <div class="field">
+            <div class="modal-title">editar follow-up</div>
+            <div class="field" style="margin-bottom: 12px;">
                 <label for="novaData">nova data</label>
                 <input type="date" id="novaData" />
             </div>
+            <div class="field">
+                <label for="novoContexto">contexto</label>
+                <textarea id="novoContexto" rows="3" placeholder="O que foi discutido na última conversa?"></textarea>
+            </div>
             <div class="modal-actions">
                 <button class="btn-ghost" onclick="fecharModal()">cancelar</button>
-                <button class="btn-primary" onclick="confirmarRemarcar()">salvar</button>
+                <button class="btn-primary" onclick="confirmarEdicao()">salvar</button>
             </div>
         </div>
     </div>
@@ -122,9 +130,10 @@
             setTimeout(() => t.className = "toast", 2500);
         }
 
-        function abrirModal(id, dataAtual) {
+        function abrirModal(id, dataAtual, contextoAtual) {
             idEmEdicao = id;
             document.getElementById("novaData").value = dataAtual;
+            document.getElementById("novoContexto").value = contextoAtual || "";
             document.getElementById("modalOverlay").classList.add("show");
         }
 
@@ -133,22 +142,23 @@
             document.getElementById("modalOverlay").classList.remove("show");
         }
 
-        async function confirmarRemarcar() {
+        async function confirmarEdicao() {
             const novaData = document.getElementById("novaData").value;
+            const novoContexto = document.getElementById("novoContexto").value;
             if (!novaData || !idEmEdicao) return;
 
             try {
                 const res = await fetch(`${API}/contatos/${idEmEdicao}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ proximo_contato: novaData })
+                    body: JSON.stringify({ proximo_contato: novaData, contexto: novoContexto })
                 });
                 if (!res.ok) throw new Error();
                 fecharModal();
-                showToast("follow-up remarcado ✓");
+                showToast("follow-up atualizado ✓");
                 carregarContatos();
             } catch {
-                showToast("erro ao remarcar", true);
+                showToast("erro ao atualizar", true);
             }
         }
 
@@ -185,19 +195,23 @@
 
                 lista.innerHTML = contatos.map(c => {
                     const tipo = classificar(c.proximo_contato);
+                    const contextoHtml = c.contexto
+                        ? `<div class="contact-contexto">${c.contexto}</div>`
+                        : "";
                     return `
             <div class="contact-card ${tipo}">
               <div class="avatar ${tipo}">${iniciais(c.nome)}</div>
               <div class="contact-info">
                 <div class="contact-name">${c.nome}</div>
                 <div class="contact-empresa">${c.empresa}</div>
+                ${contextoHtml}
               </div>
               <div class="contact-date">
                 <div class="date-label">follow-up</div>
                 <span class="date-badge ${tipo}">${labelData(c.proximo_contato)}</span>
               </div>
               <div class="contact-actions">
-                <button class="btn-action remarcar" onclick="abrirModal(${c.id}, '${c.proximo_contato}')" title="Remarcar">↻</button>
+                <button class="btn-action remarcar" onclick="abrirModal(${c.id}, '${c.proximo_contato}', ${JSON.stringify(c.contexto || '')})" title="Editar">✎</button>
                 <button class="btn-action deletar" onclick="deletarContato(${c.id}, '${c.nome}')" title="Remover">✕</button>
               </div>
             </div>`;
@@ -216,8 +230,9 @@
             const nome = document.getElementById("inputNome").value.trim();
             const empresa = document.getElementById("inputEmpresa").value.trim();
             const data = document.getElementById("inputData").value;
+            const contexto = document.getElementById("inputContexto").value.trim();
 
-            if (!nome || !empresa || !data) { showToast("preencha todos os campos", true); return; }
+            if (!nome || !empresa || !data) { showToast("preencha nome, empresa e data", true); return; }
 
             const btn = document.getElementById("btnSalvar");
             btn.disabled = true;
@@ -227,11 +242,12 @@
                 const res = await fetch(`${API}/contatos`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ nome, empresa, proximo_contato: data })
+                    body: JSON.stringify({ nome, empresa, proximo_contato: data, contexto })
                 });
                 if (!res.ok) throw new Error();
                 document.getElementById("inputNome").value = "";
                 document.getElementById("inputEmpresa").value = "";
+                document.getElementById("inputContexto").value = "";
                 document.getElementById("inputData").value = hoje();
                 showToast("contato adicionado ✓");
                 carregarContatos();
